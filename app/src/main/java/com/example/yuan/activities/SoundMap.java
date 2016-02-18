@@ -253,7 +253,7 @@ public class SoundMap extends FragmentActivity implements
 
         //Sliding Up panel and its Listener
         mSlidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        mSlidingLayout.setAnchorPoint(0.65f);
+        mSlidingLayout.setAnchorPoint(0.55f);
         mSlidingLayout.setTouchEnabled(false);
         mSlidingLayout.setPanelSlideListener(
             new SlidingUpPanelLayout.PanelSlideListener() {
@@ -266,7 +266,7 @@ public class SoundMap extends FragmentActivity implements
 
                 @Override
                 public void onPanelExpanded(View panel) {
-                        mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                    mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
                 }
 
                 @Override
@@ -276,11 +276,13 @@ public class SoundMap extends FragmentActivity implements
                     mBtnStartMonitor.setVisibility(View.VISIBLE);
                     mBtnStartMonitor.setClickable(true);
                     mMap.getUiSettings().setScrollGesturesEnabled(true);
+                    mSlidingLayout.setTouchEnabled(false);
                 }
 
                 @Override
                 public void onPanelAnchored(View panel) {
-                        //mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                    //mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                    mSlidingLayout.setTouchEnabled(true);
                 }
 
                 @Override
