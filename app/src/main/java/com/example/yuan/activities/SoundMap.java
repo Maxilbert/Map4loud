@@ -118,6 +118,9 @@ public class SoundMap extends FragmentActivity implements
     private RoundProgressBar mRoundProgressBar;
     private Button mBtnStartMonitor;
     private Button mBtnStopMonitor;
+    private Button mBtnLocation;
+    private Button mBtnSetting;
+    private Button mBtnQuestion;
     //
     //private HashMap<LatLng,Float> gridDataCache = new HashMap<LatLng,Float>();
     private HashSet<LatLng> gridDataCache = new HashSet<LatLng>();
@@ -140,8 +143,6 @@ public class SoundMap extends FragmentActivity implements
     private int locationChangeCount = 0;
 
     private float dBA;
-    private boolean isRecordFinished = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +174,9 @@ public class SoundMap extends FragmentActivity implements
         mMonitoringView = (TextView) findViewById(R.id.monitoringView);
         mBtnStartMonitor = (Button) findViewById(R.id.btnStartMonitor);
         mBtnStopMonitor = (Button) findViewById(R.id.btnStopMonitor);
+        mBtnLocation = (Button) findViewById(R.id.btnLocation);
+        mBtnSetting = (Button) findViewById(R.id.btnSetting);
+        mBtnQuestion = (Button) findViewById(R.id.btnQuestion);
 
         //Set default camera view of Google Map through programmtically generated mapView
         //GoogleMapOptions options = new GoogleMapOptions();
@@ -312,9 +316,11 @@ public class SoundMap extends FragmentActivity implements
         mBtnMeasure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final boolean pendingServiceFlag[] = {false};
                 if(serviceFlag) {
-                    Toast.makeText(SoundMap.this, "Monitor service stopped!", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(SoundMap.this, "Monitor service suspended!", Toast.LENGTH_LONG).show();
                     serviceFlag = false;
+                    pendingServiceFlag[0] = true;
                     Intent intent = new Intent(SoundMap.this, Audient.class);
                     stopService(intent);
                 }
@@ -331,7 +337,7 @@ public class SoundMap extends FragmentActivity implements
                 mBtnStopMonitor.setVisibility(View.INVISIBLE);
 
                 updateLocation();
-                boolean flag = true;
+
                 double lat = currentLatLon[0], lon = currentLatLon[1];
                 if (40.65 < lat && lat < 40.95 && -74.25 < lon && lon < -73.85) {
                     uploadFlag = true;
@@ -360,6 +366,13 @@ public class SoundMap extends FragmentActivity implements
                                 mRoundProgressBar.setProgress(progress[0]);
                                 progress[0]++;
                             } else {
+                                if (pendingServiceFlag[0]) {
+                                    Intent intent = new Intent(SoundMap.this, Audient.class);
+                                    intent.putExtra("username", name);
+                                    startService(intent);
+                                    serviceFlag = true;
+                                    //Toast.makeText(SoundMap.this, "Monitor service recovered!", Toast.LENGTH_LONG).show();
+                                }
                                 //mRoundProgressBar.setVisibility(View.INVISIBLE);
                                 //mBtnCollapse.setClickable(true);
                                 progress[0] = 0;
@@ -420,6 +433,12 @@ public class SoundMap extends FragmentActivity implements
                     Intent intent = new Intent(SoundMap.this, Audient.class);
                     stopService(intent);
                 }
+            }
+        });
+        mBtnLocation.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }
@@ -663,7 +682,6 @@ public class SoundMap extends FragmentActivity implements
             if(dBA!=0) {
                 audioFile = new File(data.getString("audioFile"));
                 System.out.println(audioFile.toString());
-                isRecordFinished = true;
                 //Toast.makeText(SoundMap.this, "Username: " + name + ", Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
                 new Thread(new SendDataThread(SoundMap.this, dBA, currentLatLon[1], currentLatLon[0], name, mSendDataHandler, audioFile)).start();
             } else {
