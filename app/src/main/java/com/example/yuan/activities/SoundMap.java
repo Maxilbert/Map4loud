@@ -438,7 +438,7 @@ public class SoundMap extends FragmentActivity implements
         mBtnLocation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-
+                checkLocation();
             }
         });
     }
