@@ -1,8 +1,11 @@
 package com.example.yuan.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -45,9 +48,94 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        initView();
-        setListener();
+        checkPermission();
+    }
+
+    private void checkPermission (){
+        if (ActivityCompat.checkSelfPermission(getApplication(), android.Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED) {
+            int REQUEST_CODE = 100;
+            ActivityCompat.requestPermissions(Login.this, new String[]{Manifest.permission.INTERNET}, REQUEST_CODE);
+        }
+        else if (ActivityCompat.checkSelfPermission(getApplication(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            int REQUEST_CODE = 101;
+            ActivityCompat.requestPermissions(Login.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
+        }
+        else if (ActivityCompat.checkSelfPermission(getApplication(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            int REQUEST_CODE = 102;
+            ActivityCompat.requestPermissions(Login.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+        }
+        else if (ActivityCompat.checkSelfPermission(getApplication(), android.Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            int REQUEST_CODE = 103;
+            ActivityCompat.requestPermissions(Login.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
+        }
+        else if (ActivityCompat.checkSelfPermission(getApplication(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            int REQUEST_CODE = 104;
+            ActivityCompat.requestPermissions(Login.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+        } else {
+            setContentView(R.layout.activity_login);
+            initView();
+            setListener();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 100:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    checkPermission();
+                } else {
+                    onPause();
+                    onStop();
+                    onDestroy();
+                }
+                break;
+            case 101:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    checkPermission();
+                } else {
+                    onPause();
+                    onStop();
+                    onDestroy();
+                }
+                break;
+            case 102:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    checkPermission();
+                } else {
+                    onPause();
+                    onStop();
+                    onDestroy();
+                }
+                break;
+            case 103:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    checkPermission();
+                } else {
+                    onPause();
+                    onStop();
+                    onDestroy();
+                }
+                break;
+            case 104:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    checkPermission();
+                } else {
+                    onPause();
+                    onStop();
+                    onDestroy();
+                }
+                break;
+            default:
+                break;
+        }
+
     }
 
     @Override
@@ -165,7 +253,7 @@ public class Login extends AppCompatActivity {
             //HttpClient httpClient = new DefaultHttpClient();
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //String url = "https://web.njit.edu/~yl768/webapps7/Verify";
-            String url = "http://128.235.40.165:8080/Verify";
+            String url = "http://128.235.40.185:8080/MyWebAppTest/Verify";
             //第二步：生成使用POST方法的请求对象
             HttpPost httpPost = new HttpPost(url);
             //NameValuePair对象代表了一个需要发往服务器的键值对

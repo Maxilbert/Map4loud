@@ -1,13 +1,17 @@
 package com.example.yuan.activities;
 
+import com.example.yuan.classes.LabelAlert;
+import com.example.yuan.services.Audient;
 import com.example.yuan.views.RoundProgressBar;
 import com.example.yuan.classes.SoundMeter;
+import com.example.yuan.classes.SendDataThread;
 
 import com.example.yuan.map4loud.R;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +26,8 @@ import java.util.TimerTask;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -77,10 +83,13 @@ import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 public class SoundMap extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener{
 
     String name = null;
-    public double calibration = 4.0;
+    public double calibration = 5.0;
+    private int duration = 20000;
+
+    private File audioFile = null;
 
     //http://128.235.40.185:8080/MyWebAppTest/ReturnData
     private GoogleMap mMap;
@@ -94,15 +103,21 @@ public class SoundMap extends FragmentActivity implements
 
     private boolean uploadFlag = false;
 
+    private boolean serviceFlag = false;
+
     private CheckBox mCheckLden;
     private CheckBox mCheckTwoHour;
     private CheckBox mCheckEvent;
     private CheckBox mCheckSource;
-    private Button mBtnExpand;
+    private Button mBtnMeasure;
     private Button mBtnCollapse;
+    private Button mBtnMonitor;
     private TextView mDecibelView;
+    private TextView mMonitoringView;
     private SlidingUpPanelLayout mSlidingLayout;
     private RoundProgressBar mRoundProgressBar;
+    private Button mBtnStartMonitor;
+    private Button mBtnStopMonitor;
     //
     //private HashMap<LatLng,Float> gridDataCache = new HashMap<LatLng,Float>();
     private HashSet<LatLng> gridDataCache = new HashSet<LatLng>();
@@ -117,6 +132,7 @@ public class SoundMap extends FragmentActivity implements
     private final LatLng NORTHWEST = new LatLng(40.95, -74.25);
 
     private Timer timer;
+    private SoundMeter mMeter = null;
 
     double currentLatLon[] = {91.0, 181.0};
     private GoogleApiClient mGoogleApiClient;
@@ -144,16 +160,19 @@ public class SoundMap extends FragmentActivity implements
         //Get current username
         Intent intent = getIntent();
         name = intent.getStringExtra("username");
-        Thread soundMeter;
         //Initial checkboxes and button
         mCheckLden = (CheckBox) findViewById(R.id.checkLden);
         mCheckTwoHour = (CheckBox) findViewById(R.id.checkTwoHour);
         mCheckEvent = (CheckBox) findViewById(R.id.checkEvent);
         mCheckSource = (CheckBox) findViewById(R.id.checkSource);
-        mBtnExpand = (Button) findViewById(R.id.btnRecord);
+        mBtnMeasure = (Button) findViewById(R.id.btnRecord);
         mBtnCollapse =  (Button) findViewById(R.id.btnCollapse);
+        mBtnMonitor = (Button) findViewById(R.id.btnMonitor);
         mRoundProgressBar = (RoundProgressBar) findViewById(R.id.roundProgressBar);
         mDecibelView = (TextView) findViewById(R.id.decibelView);
+        mMonitoringView = (TextView) findViewById(R.id.monitoringView);
+        mBtnStartMonitor = (Button) findViewById(R.id.btnStartMonitor);
+        mBtnStopMonitor = (Button) findViewById(R.id.btnStopMonitor);
 
         //Set default camera view of Google Map through programmtically generated mapView
         //GoogleMapOptions options = new GoogleMapOptions();
@@ -178,12 +197,14 @@ public class SoundMap extends FragmentActivity implements
 
         //Set default UI of Google Map
         UiSettings us = mMap.getUiSettings();
+
         us.setZoomControlsEnabled(true);
         us.setZoomGesturesEnabled(true);
         us.setScrollGesturesEnabled(true);
         us.setCompassEnabled(true);
         us.setRotateGesturesEnabled(false);
         us.setTiltGesturesEnabled(false);
+        us.setMyLocationButtonEnabled(false);
 
         //initial the bounds of sound data query;
         east = mMap.getProjection().getVisibleRegion().latLngBounds.getCenter().longitude;
@@ -193,7 +214,6 @@ public class SoundMap extends FragmentActivity implements
 
         //Draw the BOUNDS of monitoring area
         drawBounds();
-
 
 
         //Set listener for camera view change
@@ -251,7 +271,11 @@ public class SoundMap extends FragmentActivity implements
 
                 @Override
                 public void onPanelCollapsed(View panel) {
-                        //timer.cancel();
+                    mBtnMeasure.setVisibility(View.VISIBLE);
+                    mBtnMeasure.setClickable(true);
+                    mBtnStartMonitor.setVisibility(View.VISIBLE);
+                    mBtnStartMonitor.setClickable(true);
+                    mMap.getUiSettings().setScrollGesturesEnabled(true);
                 }
 
                 @Override
@@ -266,27 +290,44 @@ public class SoundMap extends FragmentActivity implements
             }
         );
 
+        // Progress Bar
+        final int[] progress = {0};
+        final Thread[] soundMeterThread = {null};
         //Collapse Button Listener
         mBtnCollapse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBtnExpand.setVisibility(View.VISIBLE);
-                mBtnCollapse.setClickable(false);
-                mBtnExpand.setClickable(true);
-                timer.cancel();
+                mBtnMeasure.setVisibility(View.VISIBLE);
+                mBtnMeasure.setClickable(true);
+                //mBtnCollapse.setClickable(false);
+                //timer.cancel();
                 mMap.getUiSettings().setScrollGesturesEnabled(true);
-                mRoundProgressBar.setProgress(0);
+                if (progress[0] == 0) mRoundProgressBar.setProgress(0);
                 mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
             }
         });
-
-        //Expand Button Listener
-        mBtnExpand.setOnClickListener(new View.OnClickListener() {
+        //Expand, One Time Measure Button Listener
+        mBtnMeasure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBtnCollapse.setClickable(false);
-                mBtnExpand.setClickable(false);
-                mBtnExpand.setVisibility(View.INVISIBLE);
+                if(serviceFlag) {
+                    Toast.makeText(SoundMap.this, "Monitor service stopped!", Toast.LENGTH_LONG).show();
+                    serviceFlag = false;
+                    Intent intent = new Intent(SoundMap.this, Audient.class);
+                    stopService(intent);
+                }
+                //mBtnCollapse.setClickable(false);
+                //mBtnMeasure.setClickable(false);
+                //mBtnMeasure.setVisibility(View.INVISIBLE);
+                mMap.getUiSettings().setScrollGesturesEnabled(false);
+                mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                mDecibelView.setVisibility(View.VISIBLE);
+                mMonitoringView.setVisibility(View.INVISIBLE);
+                mBtnMeasure.setClickable(false);
+                mRoundProgressBar.setVisibility(View.VISIBLE);
+                mBtnStartMonitor.setVisibility(View.INVISIBLE);
+                mBtnStopMonitor.setVisibility(View.INVISIBLE);
+
                 updateLocation();
                 boolean flag = true;
                 double lat = currentLatLon[0], lon = currentLatLon[1];
@@ -300,38 +341,87 @@ public class SoundMap extends FragmentActivity implements
                     return;
                 }
                 uploadFlag = true;
-                mMap.getUiSettings().setScrollGesturesEnabled(false);
-                mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
 
                 //Start to record and analyze sound
-
-                new Thread(new SoundMeter(mTotDecibelHandler, mCurrentDecibelHandler, calibration)).start();
-
                 //Set progress bar while record
-                mRoundProgressBar.setVisibility(View.VISIBLE);
-                if (timer != null) {
-                    timer.cancel();
-                }
-                timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    int progress = 0;
-
-                    public void run() {
-                        if (progress <= 100) {
-                            mRoundProgressBar.setProgress(progress);
-                            progress++;
-                        } else {
-                            //mRoundProgressBar.setVisibility(View.INVISIBLE);
-                            mBtnCollapse.setClickable(true);
-                            timer.cancel();
-                        }
+                if (soundMeterThread[0] == null) {
+                    mMeter = new SoundMeter(mMeterHandler, mCurrentDecibelHandler, calibration, duration);
+                    soundMeterThread[0] = new Thread(mMeter);
+                    soundMeterThread[0].start();
+                    if (timer != null) {
+                        timer.cancel();
                     }
-                }, 0, 1 * 100);
-                //Start to send data to server
+                    timer = new Timer();
+                    timer.schedule(new TimerTask() {
+                        public void run() {
+                            if (progress[0] <= 100) {
+                                mRoundProgressBar.setProgress(progress[0]);
+                                progress[0]++;
+                            } else {
+                                //mRoundProgressBar.setVisibility(View.INVISIBLE);
+                                //mBtnCollapse.setClickable(true);
+                                progress[0] = 0;
+                                soundMeterThread[0] = null;
+                                mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                                timer.cancel();
+                            }
+                        }
+                    }, 0, duration / 100);
+                }
             }
         });
+        mBtnMonitor.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                mMonitoringView.setVisibility(View.VISIBLE);
+                mRoundProgressBar.setVisibility(View.INVISIBLE);
+                mDecibelView.setVisibility(View.INVISIBLE);
+                if(!serviceFlag) {
+                    mBtnStartMonitor.setVisibility(View.VISIBLE);
+                    mBtnStartMonitor.setClickable(true);
+                    mBtnStopMonitor.setVisibility(View.INVISIBLE);
+                    mBtnStopMonitor.setClickable(false);
+                } else {
+                    mBtnStartMonitor.setVisibility(View.INVISIBLE);
+                    mBtnStartMonitor.setClickable(false);
+                    mBtnStopMonitor.setVisibility(View.VISIBLE);
+                    mBtnStopMonitor.setClickable(true);
 
+                }
+            }
+        });
+        mBtnStartMonitor.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                if(soundMeterThread[0] != null) {
+                    timer.cancel();
+                    progress[0] = 0;
+                    mMeter.stop();
+                    mMeter = null;
+                    soundMeterThread[0] = null;
+                }
+                if(!serviceFlag) {
+                    Toast.makeText(SoundMap.this, "Monitor service started!", Toast.LENGTH_LONG).show();
+                    serviceFlag = true;
+                    Intent intent = new Intent(SoundMap.this, Audient.class);
+                    intent.putExtra("username", name);
+                    startService(intent);
+                }
+            }
+        });
+        mBtnStopMonitor.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v){
+                if(serviceFlag) {
+                    Toast.makeText(SoundMap.this, "Monitor service stopped!", Toast.LENGTH_LONG).show();
+                    serviceFlag = false;
+                    mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    Intent intent = new Intent(SoundMap.this, Audient.class);
+                    stopService(intent);
+                }
+            }
+        });
     }
+
 
     private void initCamera(){
         for(int i = 0; i < 10; i++){
@@ -388,24 +478,6 @@ public class SoundMap extends FragmentActivity implements
     }
 
 
-    Handler mTotDecibelHandler = new Handler(){
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            dBA = (float) data.getDouble("dBA");
-            isRecordFinished = true;
-            Toast.makeText(SoundMap.this, "Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
-        }
-    };
-
-    Handler mCurrentDecibelHandler = new Handler(){
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            DecimalFormat df = new DecimalFormat("0.00");
-            mDecibelView.setText(df.format(data.getDouble("dBA")) + " dBA");
-        }
-    };
 
     /**
      * Camera View Change Listener:
@@ -562,10 +634,55 @@ public class SoundMap extends FragmentActivity implements
     }
 
 
+    Handler mSendDataHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            String result = data.getString("result");
+            if (!result.equals("0")){
+                dBA = (float) data.getDouble("dBA");
+                float lat = (float) data.getDouble("lat");
+                float lon = (float) data.getDouble("lon");
+                Toast.makeText(SoundMap.this, "Username: " + name + ", Lat: " + lat + ", Lon: " + lon + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
+                audioFile.delete();
+                audioFile = null;
+                new LabelAlert(SoundMap.this);
+            } else {
+                Toast.makeText(SoundMap.this, "Fail to upload data.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    Handler mMeterHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            dBA = (float) data.getDouble("dBA");
+            if(dBA!=0) {
+                audioFile = new File(data.getString("audioFile"));
+                System.out.println(audioFile.toString());
+                isRecordFinished = true;
+                //Toast.makeText(SoundMap.this, "Username: " + name + ", Lat: " + currentLatLon[0] + ", Lon: " + currentLatLon[1] + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
+                new Thread(new SendDataThread(SoundMap.this, dBA, currentLatLon[1], currentLatLon[0], name, mSendDataHandler, audioFile)).start();
+            } else {
+                return;
+            }
+        }
+    };
+
+    Handler mCurrentDecibelHandler = new Handler(){
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            DecimalFormat df = new DecimalFormat("0.00");
+            mDecibelView.setText(df.format(data.getDouble("dBA")) + " dBA");
+        }
+    };
+
     /**
      *
      */
-    Handler mHttpHandler = new Handler(){
+    Handler mRequestDataHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -619,7 +736,7 @@ public class SoundMap extends FragmentActivity implements
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //The url of servlet
             //String url = "https://web.njit.edu/~yl768/webapps7/ReturnData";
-            String url = "http://128.235.40.165:8080/ReturnData";
+            String url = "http://128.235.40.185:8080/MyWebAppTest/ReturnData";
             //New HTTP Post request
             HttpPost httpPost = new HttpPost(url);
             //Add Name Value Pairs to HTTP request
@@ -657,10 +774,87 @@ public class SoundMap extends FragmentActivity implements
             Bundle data = new Bundle();
             data.putString("soundData", result);
             msg.setData(data);
-            mHttpHandler.sendMessage(msg);
+            mRequestDataHandler.sendMessage(msg);
         }
     }
 
+/*
+    class SendDataThread implements Runnable {
+        private double dBA;
+        public SendDataThread(double dBA){
+            this.dBA = dBA;
+        }
+        @Override
+        public void run() {
+            // TODO: http post.
+            String result = "0";
+            //Get the instance of ClosealbeHttpClient
+            HttpClient httpClient = HttpClients.createDefault();
+            //The url of servlet
+            //String url = "https://web.njit.edu/~yl768/webapps7/ReceiveData";
+            String url = "http://128.235.40.185:8080/MyWebAppTest/ReceiveData1";
+            //New HTTP Post request
+            HttpPost httpPost = new HttpPost(url);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);//设置浏览器兼容模式
+            builder.addBinaryBody("audioFile", audioFile, ContentType.DEFAULT_BINARY, "sampling.wav");
+            builder.addTextBody("lon", "" + currentLatLon[1]);
+            builder.addTextBody("lat", "" + currentLatLon[0]);
+            builder.addTextBody("dB", "" + dBA);
+            builder.addTextBody("user", "" + name);
+            builder.addTextBody("fileName", audioFile.toString());
+            //Add Name Value Pairs to HTTP request
+//            String parameters = "{\"lon\":\"" + currentLatLon[1]
+//                    + "\",\"lat\":\"" + currentLatLon[0]
+//                    + "\",\"dB\":\"" + dBA
+//                    + "\",\"user\":\"" + name
+//                    + "\",\"fileName\":\"" + audioFile.toString() + "\"}";
+//            builder.addTextBody("parameters", parameters);
+//            NameValuePair pair1 = new BasicNameValuePair("lon", "" + currentLatLon[1]);
+//            NameValuePair pair2 = new BasicNameValuePair("lat", "" + currentLatLon[0]);
+//            NameValuePair pair3 = new BasicNameValuePair("dB", "" + dBA);
+//            NameValuePair pair4 = new BasicNameValuePair("user", "" + name);
+//            NameValuePair pair5 = new BasicNameValuePair("fileName", audioFile.toString());
+//            ArrayList<NameValuePair> pairs = new ArrayList<>();
+//            pairs.add(pair1);
+//            pairs.add(pair2);
+//            pairs.add(pair3);
+//            pairs.add(pair4);
+//            pairs.add(pair5);
+
+            //Send Http post request
+            try {
+                HttpEntity httpEntity = builder.build();
+                //HttpEntity httpEntity = new UrlEncodedFormEntity(pairs);
+                httpPost.setEntity(httpEntity);
+                HttpResponse response = httpClient.execute(httpPost);
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    HttpEntity entity = response.getEntity();
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(entity.getContent()));
+                    result = reader.readLine();
+                    Log.d("HTTP", "POST:" + result);
+                } else {
+                    result = "" + response.getStatusLine().getStatusCode();
+                    Log.d("HTTP", "ERROR:" + result);
+                }
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            } catch (IOException e2) {
+                Toast.makeText(SoundMap.this,"Cannot access server, please connect NJIT LAN or VPN.",Toast.LENGTH_LONG).show();
+                e2.printStackTrace();
+            }
+            Message msg = new Message();
+            Bundle data = new Bundle();
+            data.putString("result", result);
+            data.putDouble("lon", currentLatLon[1]);
+            data.putDouble("lat", currentLatLon[0]);
+            data.putDouble("dBA", dBA);
+            msg.setData(data);
+            mSendDataHandler.sendMessage(msg);
+        }
+    }
+*/
 
 //    /**
 //     *
@@ -735,6 +929,10 @@ public class SoundMap extends FragmentActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(serviceFlag){
+            Intent intent = new Intent(SoundMap.this, Audient.class);
+            stopService(intent);
+        }
         //mMapView.onDestroy();
     }
 
@@ -746,7 +944,7 @@ public class SoundMap extends FragmentActivity implements
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             mLocationRequest = LocationRequest.create();
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            mLocationRequest.setInterval(10*1000); // Update location every second
+            mLocationRequest.setInterval(300*1000); // Update location every second
             mLocationRequest.setFastestInterval(1*1000); // Update location every second
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);

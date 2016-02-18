@@ -62,15 +62,99 @@
             <fragment class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/mapView"
-                android:layout_weight="0.96" />
+                android:layout_marginBottom="70dip"
+                android:id="@+id/mapView" />
             <Button
-                android:layout_width="65dp"
-                android:layout_height="55dp"
-                android:background="@drawable/mic"
+                android:layout_width="60dip"
+                android:layout_height="60dip"
+                android:background="@drawable/task"
+                android:id="@+id/btnTask"
+                android:layout_marginBottom="9dip"
+                android:layout_gravity="start|bottom" />
+            <Button
+                android:layout_width="54dip"
+                android:layout_height="54dip"
+                android:background="@drawable/meter"
                 android:id="@+id/btnRecord"
-                android:layout_weight="0.01"
+                android:layout_marginLeft="83dip"
+                android:layout_marginBottom="10dip"
+                android:layout_gravity="start|bottom" />
+
+            <Button
+                android:layout_width="70dip"
+                android:layout_height="73dip"
+                android:background="@drawable/hear"
+                android:id="@+id/btnMonitor"
+                android:layout_marginBottom="0dip"
                 android:layout_gravity="center_horizontal|bottom" />
+
+            <Button
+                android:layout_width="62dip"
+                android:layout_height="62dip"
+                android:background="@drawable/profile"
+                android:id="@+id/btnProfile"
+                android:layout_marginRight="83dip"
+                android:layout_marginBottom="5dip"
+                android:layout_gravity="end|bottom"/>
+
+            <Button
+                android:layout_width="52dip"
+                android:layout_height="50dip"
+                android:background="@drawable/community"
+                android:id="@+id/btnFriends"
+                android:layout_marginBottom="9dip"
+                android:layout_marginRight="5dip"
+                android:layout_gravity="end|bottom" />
+
+            <Button
+                android:layout_width="40sp"
+                android:layout_height="40sp"
+                android:clickable="false"
+                android:layout_marginTop="10sp"
+                android:layout_marginRight="10sp"
+                android:background="@drawable/shadow"
+                android:layout_gravity="right|top" />
+            <Button
+                android:layout_width="30sp"
+                android:layout_height="30sp"
+                android:layout_marginTop="15sp"
+                android:layout_marginRight="15sp"
+                android:background="@drawable/location"
+                android:id="@+id/button"
+                android:layout_gravity="right|top" />
+            <Button
+                android:layout_width="40sp"
+                android:layout_height="40sp"
+                android:clickable="false"
+                android:layout_marginTop="49sp"
+                android:layout_marginRight="10sp"
+                android:background="@drawable/shadow"
+                android:layout_gravity="right|top" />
+            <Button
+                android:layout_width="30sp"
+                android:layout_height="30sp"
+                android:background="@drawable/setting1"
+                android:layout_marginTop="54sp"
+                android:layout_marginRight="15sp"
+                android:id="@+id/button2"
+                android:layout_gravity="right|top" />
+            <Button
+                android:layout_width="40sp"
+                android:layout_height="40sp"
+                android:clickable="false"
+                android:layout_marginTop="88sp"
+                android:layout_marginRight="10sp"
+                android:background="@drawable/shadow"
+                android:layout_gravity="right|top" />
+            <Button
+                android:layout_width="26sp"
+                android:layout_height="26sp"
+                android:background="@drawable/question"
+                android:layout_marginTop="95sp"
+                android:layout_marginRight="17sp"
+                android:id="@+id/button3"
+                android:layout_gravity="right|top" />
+
         </FrameLayout>
 
     </LinearLayout>
@@ -83,8 +167,8 @@
         android:weightSum="1">
 
         <Button
-            android:layout_width="65dp"
-            android:layout_height="50dp"
+            android:layout_width="80dp"
+            android:layout_height="55dp"
             android:id="@+id/btnCollapse"
             android:background="@drawable/arrow_down_01" />
 
@@ -93,9 +177,35 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="45sp"
             android:text="0 dBA"
-            android:textSize="40sp"
+            android:textColor="#000000"
+            android:textSize="37sp"
             android:textStyle="bold"
             android:id="@+id/decibelView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-50sp"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:textColor="#000000"
+            android:text="Provide a quit slient service to monitor your acoutic exposure no matter where you go and when it is. Find your own peace with a simple click on below button named START MONITOR MODE and it will not disturb you."
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:id="@+id/monitoringView" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="50sp"
+            android:layout_marginTop="20sp"
+            android:text="Start Monitor Mode"
+            android:id="@+id/btnStartMonitor"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="50sp"
+            android:layout_marginTop="-50sp"
+            android:text="Stop Monitor Mode"
+            android:id="@+id/btnStopMonitor"/>
 
         <com.example.yuan.views.RoundProgressBar
             android:id="@+id/roundProgressBar"
@@ -104,8 +214,7 @@
             android:layout_height="100dip"
             android:layout_alignLeft="@+id/roundProgressBar1"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="90dip"
-
+            android:layout_marginTop="-85sp"
             roundbar:roundColor="#BFBFBF"
             roundbar:roundProgressColor="#454545"
             roundbar:textColor="#454545"
