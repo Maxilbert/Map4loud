@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Lden map"
+        android:id="@+id/checkLden"
+        android:checked="true"
+        android:layout_marginLeft="23dp"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show two-hour dBA map"
+        android:id="@+id/checkTwoHour"
+        android:checked="false"
+        android:layout_marginLeft="23dp"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show noise events"
+        android:id="@+id/checkEvent"
+        android:checked="true"
+        android:layout_marginLeft="23dp"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show permanent noise sources"
+        android:id="@+id/checkSource"
+        android:checked="true"
+        android:layout_marginLeft="23dp"/>
+</LinearLayout>
+
+

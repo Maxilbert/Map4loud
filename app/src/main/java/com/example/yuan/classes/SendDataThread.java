@@ -56,7 +56,9 @@ public class SendDataThread implements Runnable {
         HttpClient httpClient = HttpClients.createDefault();
         //The url of servlet
         //String url = "https://web.njit.edu/~yl768/webapps7/ReceiveData";
-        String url = "http://128.235.40.185:8080/MyWebAppTest/ReceiveData1";
+        //String url = "http://128.235.40.185:8080/MyWebAppTest/ReceiveData1";
+        String url = "https://map4noise.njit.edu/ReceiveData1.php";
+        //String url = "https://web.njit.edu/~yl768/ReceiveData1.php";
         //New HTTP Post request
         HttpPost httpPost = new HttpPost(url);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();

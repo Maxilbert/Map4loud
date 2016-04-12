@@ -3,6 +3,7 @@ package com.example.yuan.activities;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +29,7 @@ import ch.boye.httpclientandroidlib.impl.client.CloseableHttpClient;
 import ch.boye.httpclientandroidlib.impl.client.HttpClients;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
-public class Register extends AppCompatActivity {
+public class Register extends FragmentActivity {
 
     private Button mBtnSub = null;
     private Button mBtnReturn = null;
@@ -154,7 +155,8 @@ public class Register extends AppCompatActivity {
             //HttpClient httpClient = new DefaultHttpClient();
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //String url = "https://web.njit.edu/~yl768/webapps7/Register";
-            String url = "http://128.235.40.185:8080/MyWebAppTest/Register";
+            //String url = "http://128.235.40.185:8080/MyWebAppTest/Register";
+            String url = "https://map4noise.njit.edu/Register.php";
             //第二步：生成使用POST方法的请求对象
             HttpPost httpPost = new HttpPost(url);
             //NameValuePair对象代表了一个需要发往服务器的键值对

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -35,7 +36,7 @@ import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 /**
  * Login Activity
  */
-public class Login extends AppCompatActivity {
+public class Login extends FragmentActivity {
 
     private Button mBtnLgn = null;
     private Button mBtnReg = null;
@@ -253,7 +254,8 @@ public class Login extends AppCompatActivity {
             //HttpClient httpClient = new DefaultHttpClient();
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //String url = "https://web.njit.edu/~yl768/webapps7/Verify";
-            String url = "http://128.235.40.185:8080/MyWebAppTest/Verify";
+            //String url = "http://128.235.40.185:8080/MyWebAppTest/Verify";
+            String url = "https://map4noise.njit.edu/Verify.php";
             //第二步：生成使用POST方法的请求对象
             HttpPost httpPost = new HttpPost(url);
             //NameValuePair对象代表了一个需要发往服务器的键值对

@@ -1,6 +1,7 @@
 package com.example.yuan.activities;
 
 import com.example.yuan.classes.LabelAlert;
+import com.example.yuan.classes.LayerAlert;
 import com.example.yuan.services.Audient;
 import com.example.yuan.views.RoundProgressBar;
 import com.example.yuan.classes.SoundMeter;
@@ -105,10 +106,14 @@ public class SoundMap extends FragmentActivity implements
 
     private boolean serviceFlag = false;
 
+    private View mLayerView;
+
     private CheckBox mCheckLden;
     private CheckBox mCheckTwoHour;
     private CheckBox mCheckEvent;
     private CheckBox mCheckSource;
+    private LayerAlert mLayerAlert;
+
     private Button mBtnMeasure;
     private Button mBtnCollapse;
     private Button mBtnMonitor;
@@ -118,9 +123,13 @@ public class SoundMap extends FragmentActivity implements
     private RoundProgressBar mRoundProgressBar;
     private Button mBtnStartMonitor;
     private Button mBtnStopMonitor;
+
     private Button mBtnLocation;
-    private Button mBtnSetting;
+    private Button mBtnLayer;
     private Button mBtnQuestion;
+    private Button mBtnProfile;
+    private Button mBtnFriends;
+    private Button mBtnSetting;
     //
     //private HashMap<LatLng,Float> gridDataCache = new HashMap<LatLng,Float>();
     private HashSet<LatLng> gridDataCache = new HashSet<LatLng>();
@@ -161,11 +170,15 @@ public class SoundMap extends FragmentActivity implements
         //Get current username
         Intent intent = getIntent();
         name = intent.getStringExtra("username");
+
         //Initial checkboxes and button
-        mCheckLden = (CheckBox) findViewById(R.id.checkLden);
-        mCheckTwoHour = (CheckBox) findViewById(R.id.checkTwoHour);
-        mCheckEvent = (CheckBox) findViewById(R.id.checkEvent);
-        mCheckSource = (CheckBox) findViewById(R.id.checkSource);
+//        mCheckLden = (CheckBox) findViewById(R.id.checkLden);
+//        mCheckTwoHour = (CheckBox) findViewById(R.id.checkTwoHour);
+//        mCheckEvent = (CheckBox) findViewById(R.id.checkEvent);
+//        mCheckSource = (CheckBox) findViewById(R.id.checkSource);
+
+
+        //initial all buttons
         mBtnMeasure = (Button) findViewById(R.id.btnRecord);
         mBtnCollapse =  (Button) findViewById(R.id.btnCollapse);
         mBtnMonitor = (Button) findViewById(R.id.btnMonitor);
@@ -175,26 +188,20 @@ public class SoundMap extends FragmentActivity implements
         mBtnStartMonitor = (Button) findViewById(R.id.btnStartMonitor);
         mBtnStopMonitor = (Button) findViewById(R.id.btnStopMonitor);
         mBtnLocation = (Button) findViewById(R.id.btnLocation);
-        mBtnSetting = (Button) findViewById(R.id.btnSetting);
+        mBtnLayer = (Button) findViewById(R.id.btnLayer);
         mBtnQuestion = (Button) findViewById(R.id.btnQuestion);
+        mBtnProfile = (Button) findViewById(R.id.btnProfile);
+        mBtnFriends = (Button) findViewById(R.id.btnFriends);
+        mBtnSetting = (Button) findViewById(R.id.btnSetting);
 
-        //Set default camera view of Google Map through programmtically generated mapView
-        //GoogleMapOptions options = new GoogleMapOptions();
-        //options.mapType(GoogleMap.MAP_TYPE_NORMAL);
-        //options.camera(new CameraPosition(new LatLng(40.80, -74.05), 14, 0, (float) 0.0));
-        //mMapView = new MapView(this, options);
-        //mMapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        //mMapView.onCreate(savedInstanceState);
-        //setContentView(mMapView);
-
-        //Set default camera view of Google Map through xml generated mapView
-        //mMapView = (MapView) findViewById(R.id.mapView);
-        //mMapView.onCreate(savedInstanceState);
+        mLayerView = View.inflate(this, R.layout.dialog_layer, null);
+        mCheckLden = (CheckBox) mLayerView.findViewById(R.id.checkLden);
+        mCheckTwoHour = (CheckBox) mLayerView.findViewById(R.id.checkTwoHour);
+        mCheckEvent = (CheckBox) mLayerView.findViewById(R.id.checkEvent);
+        mCheckSource = (CheckBox) mLayerView.findViewById(R.id.checkSource);
 
         FragmentManager fm = getSupportFragmentManager();
         mMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.mapView);
-        //setContentView(mMapView);
-        //mMap = mMapView.getMap();
         mMap = mMapFragment.getMap();
         mMap.setMyLocationEnabled(true);
 
@@ -202,7 +209,7 @@ public class SoundMap extends FragmentActivity implements
         //Set default UI of Google Map
         UiSettings us = mMap.getUiSettings();
 
-        us.setZoomControlsEnabled(true);
+        us.setZoomControlsEnabled(false);
         us.setZoomGesturesEnabled(true);
         us.setScrollGesturesEnabled(true);
         us.setCompassEnabled(true);
@@ -438,7 +445,18 @@ public class SoundMap extends FragmentActivity implements
         mBtnLocation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                checkLocation();
+                Toast.makeText(SoundMap.this,"location",Toast.LENGTH_SHORT);
+                CameraPosition position = mMap.getCameraPosition();
+                CameraPosition newPosition = new CameraPosition(new LatLng(currentLatLon[0], currentLatLon[1]), position.zoom, position.tilt, position.bearing);
+                CameraUpdate update = CameraUpdateFactory.newCameraPosition(newPosition);
+                mMap.moveCamera(update);
+            }
+        });
+        mBtnLayer.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(SoundMap.this,"layers",Toast.LENGTH_SHORT);
+                mLayerAlert = new LayerAlert(SoundMap.this, mLayerView);
             }
         });
     }
@@ -447,8 +465,9 @@ public class SoundMap extends FragmentActivity implements
     private void initCamera(){
         for(int i = 0; i < 10; i++){
             updateLocation();
-            if(currentLatLon [0] != 91)
+            if(currentLatLon [0] != 91) {
                 break;
+            }
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -756,7 +775,8 @@ public class SoundMap extends FragmentActivity implements
             CloseableHttpClient httpClient = HttpClients.createDefault();
             //The url of servlet
             //String url = "https://web.njit.edu/~yl768/webapps7/ReturnData";
-            String url = "http://128.235.40.185:8080/MyWebAppTest/ReturnData";
+            //String url = "http://128.235.40.185:8080/MyWebAppTest/ReturnData";
+            String url = "https://map4noise.njit.edu/ReturnData.php";
             //New HTTP Post request
             HttpPost httpPost = new HttpPost(url);
             //Add Name Value Pairs to HTTP request
