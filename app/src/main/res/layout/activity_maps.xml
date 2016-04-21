@@ -231,7 +231,7 @@
             android:text="Stop Monitor Mode"
             android:id="@+id/btnStopMonitor"/>
 
-        <com.example.yuan.views.RoundProgressBar
+        <edu.njit.map4noise.views.RoundProgressBar
             android:id="@+id/roundProgressBar"
             android:visibility="visible"
             android:layout_width="100dip"

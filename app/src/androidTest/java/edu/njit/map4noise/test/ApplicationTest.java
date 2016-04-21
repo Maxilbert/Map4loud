@@ -1,4 +1,4 @@
-package com.example.yuan.test;
+package edu.njit.map4noise.test;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

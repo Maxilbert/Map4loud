@@ -1,13 +1,13 @@
-package com.example.yuan.activities;
+package edu.njit.map4noise.activities;
 
-import com.example.yuan.classes.LabelAlert;
-import com.example.yuan.classes.LayerAlert;
-import com.example.yuan.services.Audient;
-import com.example.yuan.views.RoundProgressBar;
-import com.example.yuan.classes.SoundMeter;
-import com.example.yuan.classes.SendDataThread;
+import edu.njit.map4noise.classes.LabelAlert;
+import edu.njit.map4noise.classes.LayerAlert;
+import edu.njit.map4noise.services.Audient;
+import edu.njit.map4noise.views.RoundProgressBar;
+import edu.njit.map4noise.classes.SoundMeter;
+import edu.njit.map4noise.classes.SendDataThread;
 
-import com.example.yuan.map4loud.R;
+import com.example.yuan.map4noise.R;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -27,10 +27,10 @@ import java.util.TimerTask;
 
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,7 +88,8 @@ public class SoundMap extends FragmentActivity implements
 
     String name = null;
     public double calibration = 5.0;
-    private int duration = 20000;
+    private int duration = 8000;
+    private int backoff = 10000;
 
     private File audioFile = null;
 
@@ -169,7 +170,38 @@ public class SoundMap extends FragmentActivity implements
 
         //Get current username
         Intent intent = getIntent();
-        name = intent.getStringExtra("username");
+        if (intent != null) {
+            name = intent.getStringExtra("username");
+            String from = intent.getStringExtra("from");
+            if (from.equals("Audient")) {
+                this.serviceFlag = true;
+            }
+        }
+
+        SQLiteDatabase db = openOrCreateDatabase("recentUser.db", this.MODE_PRIVATE, null);
+        if(name==null) {
+            Cursor c = db.rawQuery("SELECT * FROM person WHERE id = ?", new String[]{"1"});
+            while (c.moveToNext()) {
+                name = c.getString(c.getColumnIndex("name"));
+                Log.i("db", "name => " + name);
+            }
+            c.close();
+        }
+        db.close();
+//        if (name != null) {
+//            db.execSQL("CREATE TABLE IF NOT EXISTS person (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR)");
+//            db.execSQL("REPLACE INTO person (id, name) VALUES(1, ?)", new String[]{name});
+//        } else {
+//            Cursor c = db.rawQuery("SELECT * FROM person WHERE id = ?", new String[]{"1"});
+//            while (c.moveToNext()) {
+//                name = c.getString(c.getColumnIndex("name"));
+//                Log.i("db", "name => " + name);
+//            }
+//            c.close();
+//            db.close();
+//        }
+
+
 
         //Initial checkboxes and button
 //        mCheckLden = (CheckBox) findViewById(R.id.checkLden);
@@ -376,6 +408,8 @@ public class SoundMap extends FragmentActivity implements
                                 if (pendingServiceFlag[0]) {
                                     Intent intent = new Intent(SoundMap.this, Audient.class);
                                     intent.putExtra("username", name);
+                                    intent.putExtra("duration", duration);
+                                    intent.putExtra("backoff", backoff);
                                     startService(intent);
                                     serviceFlag = true;
                                     //Toast.makeText(SoundMap.this, "Monitor service recovered!", Toast.LENGTH_LONG).show();
@@ -427,6 +461,8 @@ public class SoundMap extends FragmentActivity implements
                     serviceFlag = true;
                     Intent intent = new Intent(SoundMap.this, Audient.class);
                     intent.putExtra("username", name);
+                    intent.putExtra("duration", duration);
+                    intent.putExtra("backoff", backoff);
                     startService(intent);
                 }
             }
@@ -686,7 +722,7 @@ public class SoundMap extends FragmentActivity implements
                 Toast.makeText(SoundMap.this, "Username: " + name + ", Lat: " + lat + ", Lon: " + lon + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
                 audioFile.delete();
                 audioFile = null;
-                new LabelAlert(SoundMap.this);
+                new LabelAlert(SoundMap.this, result);
             } else {
                 Toast.makeText(SoundMap.this, "Fail to upload data.", Toast.LENGTH_SHORT).show();
             }
@@ -968,12 +1004,21 @@ public class SoundMap extends FragmentActivity implements
 
     @Override
     protected void onDestroy() {
+        String name1 = name;
+        int duration1 = duration;
+        int backoff1 = backoff;
         super.onDestroy();
-        if(serviceFlag){
-            Intent intent = new Intent(SoundMap.this, Audient.class);
-            stopService(intent);
-        }
-        //mMapView.onDestroy();
+        //前台程序销毁的时候,后台进程如何处理呢?
+//        if(serviceFlag){
+//            Intent intent = new Intent(SoundMap.this, Audient.class);
+//            stopService(intent);
+//            intent = new Intent(SoundMap.this, Audient.class);
+//            intent.putExtra("username", name1);
+//            intent.putExtra("duration", duration1);
+//            intent.putExtra("backoff", backoff1);
+//            startService(intent);
+//        }
+
     }
 
     @Override

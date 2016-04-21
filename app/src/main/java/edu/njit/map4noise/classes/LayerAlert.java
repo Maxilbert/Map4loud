@@ -1,33 +1,41 @@
-package com.example.yuan.classes;
+package edu.njit.map4noise.classes;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.yuan.map4loud.R;
+import com.example.yuan.map4noise.R;
 
 /**
- * Created by yuan on 2/18/16.
+ * Created by yuan on 2/20/16.
  */
-public class LabelAlert {
+public class LayerAlert {
 
     Context context = null;
+    View view = null;
+    AlertDialog.Builder builder = null;
 
-    public LabelAlert(Context c){
+    public LayerAlert (Context c, View v) {
         this.context = c;
-        AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                .setTitle("Label noise to UNLOCK MORE")
-                .setIcon(R.drawable.diamond)
-                .setMessage("Label your noise sample to get more sound coins, and then you can unlock acoustic data of more areas.");
+        this.view = v;
+        ViewGroup parent = ((ViewGroup) v.getParent());
+        if(parent != null)
+            parent.removeView(v);
+        builder = new AlertDialog.Builder(context)
+                .setTitle("What noise information you what?")
+                .setIcon(R.drawable.layers)
+                .setView(v);
         setPositiveButton(builder);
-        setNegativeButton(builder);
+        //setNegativeButton(builder);
         builder.setCancelable(false);
         builder.create().show();
     }
 
     private void setPositiveButton(AlertDialog.Builder builder){
-        builder.setPositiveButton("Go to label", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Back to Map", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(context, "labelling", Toast.LENGTH_SHORT).show();
@@ -43,4 +51,5 @@ public class LabelAlert {
             }
         });
     }
+
 }

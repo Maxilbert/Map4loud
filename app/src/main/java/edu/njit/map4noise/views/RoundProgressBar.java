@@ -1,4 +1,4 @@
-package com.example.yuan.views;
+package edu.njit.map4noise.views;
 
 /**
  * Created by yuan on 11/8/15.
@@ -18,7 +18,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.example.yuan.map4loud.R;
+import com.example.yuan.map4noise.R;
 
 
 public class RoundProgressBar extends View {
@@ -120,7 +120,7 @@ public class RoundProgressBar extends View {
         paint.setAntiAlias(true);  //消除锯齿
         canvas.drawCircle(centre, centre, radius, paint); //画出圆环
 
-        Log.e("log", centre + "");
+        //Log.e("log", centre + "");
 
         /**
          * 画进度百分比

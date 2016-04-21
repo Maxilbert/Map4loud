@@ -1,13 +1,13 @@
-package com.example.yuan.activities;
+package edu.njit.map4noise.activities;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.yuan.map4loud.R;
+import com.example.yuan.map4noise.R;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -220,6 +220,10 @@ public class Login extends FragmentActivity {
             //Toast.makeText(Login.this, "The result is " + val,
             //        Toast.LENGTH_LONG).show();
             if(val.equals("1")) {
+                SQLiteDatabase db = openOrCreateDatabase("recentUser.db", Login.MODE_PRIVATE, null);
+                db.execSQL("CREATE TABLE IF NOT EXISTS person (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR)");
+                db.execSQL("REPLACE INTO person (id, name) VALUES(1, ?)", new String[]{name});
+                db.close();
                 Toast.makeText(Login.this, "Welcome back, " + name + "!",
                         Toast.LENGTH_LONG).show();
                 Intent intent = new Intent();
@@ -228,6 +232,7 @@ public class Login extends FragmentActivity {
                 //bundle.putString("username", name);
                 //intent.putExtras(bundle);
                 intent.putExtra("username", name);
+                intent.putExtra("from", "Login");
                 Login.this.startActivity(intent);
                 //Clear password for security consideration
                 mEtPwd.setText(null, TextView.BufferType.EDITABLE);

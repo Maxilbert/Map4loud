@@ -1,4 +1,4 @@
-package com.example.yuan.classes;
+package edu.njit.map4noise.classes;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -30,7 +30,7 @@ public class SoundMeter implements Runnable {
     public Handler mMeterHandler;
     public Handler mCurrentDecibelHandler;
     public double calibration = 4.0;
-    private int duration = 20000;
+    private int duration = 8000;
 
     private int bufferSize;
     private double decibel = 0;
@@ -84,7 +84,7 @@ public class SoundMeter implements Runnable {
              dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(pcmFile)));
             //根据定义好的几个配置，来获取合适的缓冲大小
             bufferSize = 32768;//AudioRecord.getMinBufferSize(frequence, channelConfig, audioEncoding);
-            Log.d("Record", "bufferSize = " + bufferSize);
+            //Log.d("Record", "bufferSize = " + bufferSize);
             //实例化AudioRecord
             record = new AudioRecord(MediaRecorder.AudioSource.MIC, frequence, channelConfig, audioEncoding, bufferSize);
             //定义缓冲
@@ -224,7 +224,7 @@ public class SoundMeter implements Runnable {
                 //Take the inverse FFT to convert signal from frequency to time domain
                 mFFT.realInverse(freqBuffer, true);
                 sp[i] = Math.sqrt(var(freqBuffer));
-                dB[i] = 20 * Math.log10(calibration * sp[i] / 0.00002d) + aWeights[i];
+                dB[i] = 5 + 20 * Math.log10(calibration * sp[i] / 0.00002d) + aWeights[i];
                 //dB[i] = 20*Math.log10(sp[i] / 0.0000000001d);
             }
             for (int i = 0; i < nFreq; i++) {
