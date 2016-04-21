@@ -1,4 +1,4 @@
-package com.example.yuan.classes;
+package edu.njit.map4noise.classes;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -58,7 +58,6 @@ public class SendDataThread implements Runnable {
         //String url = "https://web.njit.edu/~yl768/webapps7/ReceiveData";
         //String url = "http://128.235.40.185:8080/MyWebAppTest/ReceiveData1";
         String url = "https://map4noise.njit.edu/ReceiveData1.php";
-        //String url = "https://web.njit.edu/~yl768/ReceiveData1.php";
         //New HTTP Post request
         HttpPost httpPost = new HttpPost(url);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -110,6 +109,7 @@ public class SendDataThread implements Runnable {
             Toast.makeText(context, "Cannot access server, please connect NJIT LAN or VPN.", Toast.LENGTH_LONG).show();
             e2.printStackTrace();
         }
+        audioFile.delete();
         Message msg = new Message();
         Bundle data = new Bundle();
         data.putString("result", result);
@@ -117,7 +117,7 @@ public class SendDataThread implements Runnable {
         data.putDouble("lat", lat);
         data.putDouble("dBA", dBA);
         msg.setData(data);
-        if(mSendDataHandler!=null)
+        if(mSendDataHandler != null)
             mSendDataHandler.sendMessage(msg);
     }
 
