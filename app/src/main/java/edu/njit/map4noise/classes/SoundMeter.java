@@ -30,7 +30,7 @@ public class SoundMeter implements Runnable {
     public Handler mMeterHandler;
     public Handler mCurrentDecibelHandler;
     public double calibration = 4.0;
-    private int duration = 8000;
+    private int duration = 10000;
 
     private int bufferSize;
     private double decibel = 0;

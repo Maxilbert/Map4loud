@@ -33,46 +33,46 @@
             <fragment class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="70dip"
+                android:layout_marginBottom="70sp"
                 android:id="@+id/mapView" />
             <Button
-                android:layout_width="60dip"
-                android:layout_height="60dip"
+                android:layout_width="60sp"
+                android:layout_height="60sp"
                 android:background="@drawable/task"
                 android:id="@+id/btnTask"
-                android:layout_marginBottom="5dip"
-                android:layout_marginLeft="5dip"
+                android:layout_marginBottom="5sp"
+                android:layout_marginLeft="5sp"
                 android:layout_gravity="start|bottom" />
             <Button
-                android:layout_width="63dip"
-                android:layout_height="63dip"
+                android:layout_width="63sp"
+                android:layout_height="63sp"
                 android:background="@drawable/hearing1"
                 android:id="@+id/btnMonitor"
-                android:layout_marginLeft="89dip"
-                android:layout_marginBottom="4dip"
+                android:layout_marginLeft="89sp"
+                android:layout_marginBottom="4sp"
                 android:layout_gravity="start|bottom" />
             <Button
-                android:layout_width="60dip"
-                android:layout_height="60dip"
+                android:layout_width="60sp"
+                android:layout_height="60sp"
                 android:background="@drawable/meter1"
                 android:id="@+id/btnRecord"
-                android:layout_marginBottom="5dip"
+                android:layout_marginBottom="5sp"
                 android:layout_gravity="center_horizontal|bottom" />
             <Button
-                android:layout_width="60dip"
-                android:layout_height="60dip"
+                android:layout_width="60sp"
+                android:layout_height="60sp"
                 android:background="@drawable/doctor1"
                 android:id="@+id/btnDiagnosis"
-                android:layout_marginRight="89dip"
-                android:layout_marginBottom="5dip"
+                android:layout_marginRight="89sp"
+                android:layout_marginBottom="5sp"
                 android:layout_gravity="end|bottom"/>
             <Button
-                android:layout_width="60dip"
-                android:layout_height="60dip"
+                android:layout_width="60sp"
+                android:layout_height="60sp"
                 android:background="@drawable/unlock"
                 android:id="@+id/btnUnlock"
-                android:layout_marginBottom="5dip"
-                android:layout_marginRight="5dip"
+                android:layout_marginBottom="5sp"
+                android:layout_marginRight="5sp"
                 android:layout_gravity="end|bottom" />
 
 
@@ -102,8 +102,8 @@
                 android:background="@drawable/shadow"
                 android:layout_gravity="left|top" />
             <Button
-                android:layout_width="30dip"
-                android:layout_height="28dip"
+                android:layout_width="30sp"
+                android:layout_height="28sp"
                 android:background="@drawable/community"
                 android:id="@+id/btnFriends"
                 android:layout_marginTop="80sp"
@@ -191,8 +191,8 @@
         android:weightSum="1">
 
         <Button
-            android:layout_width="60dp"
-            android:layout_height="45dp"
+            android:layout_width="60sp"
+            android:layout_height="45sp"
             android:id="@+id/btnCollapse"
             android:background="@drawable/arrow_down_2" />
 
@@ -234,15 +234,15 @@
         <edu.njit.map4noise.views.RoundProgressBar
             android:id="@+id/roundProgressBar"
             android:visibility="visible"
-            android:layout_width="100dip"
-            android:layout_height="100dip"
+            android:layout_width="100sp"
+            android:layout_height="100sp"
             android:layout_alignLeft="@+id/roundProgressBar1"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="-118sp"
             roundbar:roundColor="#00f2f2f2"
             roundbar:roundProgressColor="#454545"
             roundbar:textColor="#454545"
-            roundbar:roundWidth="15dip"
+            roundbar:roundWidth="15sp"
             roundbar:textSize="18sp"/>
 
     </LinearLayout>

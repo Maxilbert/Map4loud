@@ -3,6 +3,7 @@ package edu.njit.map4noise.classes;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.yuan.map4noise.R;
@@ -14,10 +15,14 @@ public class LabelAlert {
 
     Context context = null;
     String label = null;
+    private View mLabelView;
+    private String name;
 
-    public LabelAlert(Context c, String classification){
+    public LabelAlert(Context c, String classification, String name){
         this.context = c;
-        label = classification;
+        this.label = classification;
+        this.name = name;
+        mLabelView = View.inflate(context, R.layout.dialog_label, null);
         if(label != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context)
                     .setTitle("Label noise to UNLOCK MORE")
@@ -32,15 +37,16 @@ public class LabelAlert {
         }
     }
 
-    public LabelAlert(Context c){
-        this(c, null);
+    public LabelAlert(Context c, String name){
+        this(c, null, name);
     }
 
     private void setPositiveButton(AlertDialog.Builder builder){
         builder.setPositiveButton("Go to label", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(context, "labelling", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "labeling", Toast.LENGTH_SHORT).show();
+                Go2LabelAlert mGo2LabelAlert = new Go2LabelAlert(context, mLabelView, name);
             }
         });
     }

@@ -25,7 +25,7 @@ public class LayerAlert {
         if(parent != null)
             parent.removeView(v);
         builder = new AlertDialog.Builder(context)
-                .setTitle("What noise information you what?")
+                .setTitle("What noise info do you want?")
                 .setIcon(R.drawable.layers)
                 .setView(v);
         setPositiveButton(builder);
@@ -38,7 +38,7 @@ public class LayerAlert {
         builder.setPositiveButton("Back to Map", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(context, "labelling", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Setting changed", Toast.LENGTH_SHORT).show();
             }
         });
     }

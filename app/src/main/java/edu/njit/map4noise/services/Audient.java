@@ -57,7 +57,7 @@ public class Audient extends Service implements
 
     private static String name;
     private double calibration = 5.0;
-    private static int duration = 8000;
+    private static int duration = 10000;
     private final int interval = ONE_MINUTE;
     private static int backoff = ONE_MINUTE;
 
@@ -92,7 +92,7 @@ public class Audient extends Service implements
             duration = intent.getIntExtra("duration", this.duration);
             backoff = intent.getIntExtra("backoff", this.backoff);
         }
-        SQLiteDatabase db = openOrCreateDatabase("recentUser.db", this.MODE_PRIVATE, null);
+        SQLiteDatabase db = openOrCreateDatabase("map4noise.db", this.MODE_PRIVATE, null);
         if(name==null) {
             Cursor c = db.rawQuery("SELECT * FROM person WHERE id = ?", new String[]{"1"});
             while (c.moveToNext()) {
@@ -171,88 +171,81 @@ public class Audient extends Service implements
 
 
 
-    class InfiniteMonitoringService {
-
-        ScheduledThreadPoolExecutor se;
-
-        public InfiniteMonitoringService() {
-            se = new ScheduledThreadPoolExecutor(2);
-            scheduleTask();
-        }
-
-        public void scheduleTask(){
-            se.schedule(new RecordTask(), backoff, TimeUnit.MILLISECONDS);
-            //se.schedule(new RecordTask(), 60, TimeUnit.SECONDS);
-            Log.v("Schedule", "Backoff is " + backoff);
-        }
-
-        public void stop(){
-            if(mMeter != null) {
-                mMeter.stop();
-                mMeter = null;
-            }
-            if(se != null) {
-                se.shutdownNow();
-                se = null;
-            }
-        }
-
-        class RecordTask implements Runnable {
-            public void run() {
-                mMeter = null;
-                Random random = new Random();
-                backoff = random.nextInt(ONE_MINUTE - 1) + ONE_MINUTE;
-                scheduleTask();
-                System.gc();
-                mMeter = new SoundMeter(mMeterHandler, calibration, duration);
-                new Thread(mMeter).start();
-                try {
-                    Thread.sleep(duration+100);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-
-
-//    Timer timer = null;
-
 //    class InfiniteMonitoringService {
+//
+//        ScheduledThreadPoolExecutor se;
+//
 //        public InfiniteMonitoringService() {
-//            timer = new Timer();
-//            timer.schedule(task, ONE_MINUTE, interval);
+//            se = new ScheduledThreadPoolExecutor(2);
+//            scheduleTask();
 //        }
+//
+//        public void scheduleTask(){
+//            se.schedule(new RecordTask(), backoff, TimeUnit.MILLISECONDS);
+//            //se.schedule(new RecordTask(), 60, TimeUnit.SECONDS);
+//            Log.v("Schedule", "Backoff is " + backoff);
+//        }
+//
 //        public void stop(){
 //            if(mMeter != null) {
 //                mMeter.stop();
 //                mMeter = null;
 //            }
-//            if(timer != null) {
-//                timer.cancel();
-//                timer = null;
+//            if(se != null) {
+//                se.shutdownNow();
+//                se = null;
+//            }
+//        }
+//
+//        class RecordTask implements Runnable {
+//            public void run() {
+//                mMeter = null;
+//                Random random = new Random();
+//                backoff = random.nextInt(ONE_MINUTE - 1) + ONE_MINUTE;
+//                scheduleTask();
+//                System.gc();
+//                mMeter = new SoundMeter(mMeterHandler, calibration, duration);
+//                new Thread(mMeter).start();
+//                try {
+//                    Thread.sleep(duration+100);
+//                } catch (InterruptedException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
 //            }
 //        }
 //    }
-//
-//    TimerTask task = new TimerTask() {
-//        @Override
-//        public void run() {
-////            try {
-////                Thread.sleep(backoff);
-////            } catch (InterruptedException e) {
-////                e.printStackTrace();
-////            }
-//            mMeter = null;
-////            Random random = new Random();
-////            backoff = random.nextInt(ONE_MINUTE - 1) + backoff;
-//            System.gc();
-//            mMeter = new SoundMeter(mMeterHandler, calibration, duration);
-//            new Thread(mMeter).start();
-//        }
-//    };
+
+
+
+    Timer timer = null;
+
+    class InfiniteMonitoringService {
+        public InfiniteMonitoringService() {
+            timer = new Timer();
+            timer.schedule(task, ONE_MINUTE, ONE_MINUTE);
+        }
+        public void stop(){
+            if(mMeter != null) {
+                mMeter.stop();
+                mMeter = null;
+            }
+            if(timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+        }
+    }
+
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            mMeter = null;
+            System.gc();
+            mMeter = new SoundMeter(mMeterHandler, calibration, duration);
+            new Thread(mMeter).start();
+        }
+    };
 
 //    class InfiniteMonitoringService implements Runnable {
 //        boolean flag = true;

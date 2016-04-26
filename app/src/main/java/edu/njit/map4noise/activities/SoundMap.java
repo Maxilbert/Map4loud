@@ -88,7 +88,7 @@ public class SoundMap extends FragmentActivity implements
 
     String name = null;
     public double calibration = 5.0;
-    private int duration = 8000;
+    private int duration = 10000;
     private int backoff = 10000;
 
     private File audioFile = null;
@@ -178,7 +178,7 @@ public class SoundMap extends FragmentActivity implements
             }
         }
 
-        SQLiteDatabase db = openOrCreateDatabase("recentUser.db", this.MODE_PRIVATE, null);
+        SQLiteDatabase db = openOrCreateDatabase("map4noise.db", this.MODE_PRIVATE, null);
         if(name==null) {
             Cursor c = db.rawQuery("SELECT * FROM person WHERE id = ?", new String[]{"1"});
             while (c.moveToNext()) {
@@ -722,7 +722,7 @@ public class SoundMap extends FragmentActivity implements
                 Toast.makeText(SoundMap.this, "Username: " + name + ", Lat: " + lat + ", Lon: " + lon + ", dBA: " + dBA, Toast.LENGTH_SHORT).show();
                 audioFile.delete();
                 audioFile = null;
-                new LabelAlert(SoundMap.this, result);
+                new LabelAlert(SoundMap.this, result, name);
             } else {
                 Toast.makeText(SoundMap.this, "Fail to upload data.", Toast.LENGTH_SHORT).show();
             }

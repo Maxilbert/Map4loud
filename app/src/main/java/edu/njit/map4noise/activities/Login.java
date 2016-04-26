@@ -220,7 +220,7 @@ public class Login extends FragmentActivity {
             //Toast.makeText(Login.this, "The result is " + val,
             //        Toast.LENGTH_LONG).show();
             if(val.equals("1")) {
-                SQLiteDatabase db = openOrCreateDatabase("recentUser.db", Login.MODE_PRIVATE, null);
+                SQLiteDatabase db = openOrCreateDatabase("map4noise.db", Login.MODE_PRIVATE, null);
                 db.execSQL("CREATE TABLE IF NOT EXISTS person (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR)");
                 db.execSQL("REPLACE INTO person (id, name) VALUES(1, ?)", new String[]{name});
                 db.close();
